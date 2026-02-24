@@ -396,7 +396,8 @@
                 <div class="input-section">
                     <div class="mode-toggle">
                         <button class="mode-btn active" data-mode="employee">Karyawan</button>
-                        <button class="mode-btn" data-mode="freelance">Freelance</button>
+                        <button class="mode-btn" data-mode="freelance">Freelance (NPPN)</button>
+                        <button class="mode-btn" data-mode="freelance_no_nppn">Freelance (Bruto)</button>
                     </div>
 
                     <div class="input-groups">
@@ -597,7 +598,14 @@
                     thrSection.classList.remove('show');
                     thrResultRow.classList.remove('show');
                     bonusResultRow.classList.remove('show');
-                    infoBox.textContent = 'Pajak freelance dihitung menggunakan Norma Penghitungan Penghasilan Neto (NPPN) sesuai PER-17/PJ/2015.';
+                    infoBox.textContent = 'Pajak dihitung menggunakan Norma Penghitungan Penghasilan Neto (NPPN) sesuai PER-17/PJ/2015.';
+                } else if (currentMode === 'freelance_no_nppn') {
+                    normaSection.classList.remove('show');
+                    normaResultRow.classList.remove('show');
+                    thrSection.classList.remove('show');
+                    thrResultRow.classList.remove('show');
+                    bonusResultRow.classList.remove('show');
+                    infoBox.textContent = 'Pajak dihitung dari penghasilan bruto tanpa menggunakan norma (sama seperti karyawan tanpa THR/bonus).';
                 } else {
                     normaSection.classList.remove('show');
                     normaResultRow.classList.remove('show');
@@ -659,6 +667,16 @@
                 document.getElementById('yearlyIncome').textContent = formatRupiah(yearlyIncome);
                 document.getElementById('totalIncome').textContent = formatRupiah(totalIncome);
                 document.getElementById('incomeAfterNorma').textContent = formatRupiah(incomeAfterNorma);
+                document.getElementById('thrValue').textContent = formatRupiah(0);
+                document.getElementById('bonusValue').textContent = formatRupiah(0);
+            } else if (currentMode === 'freelance_no_nppn') {
+                totalIncome = yearlyIncome;
+                pkp = Math.max(0, totalIncome - ptkp);
+                
+                // Update results
+                document.getElementById('yearlyIncome').textContent = formatRupiah(yearlyIncome);
+                document.getElementById('totalIncome').textContent = formatRupiah(totalIncome);
+                document.getElementById('incomeAfterNorma').textContent = formatRupiah(0);
                 document.getElementById('thrValue').textContent = formatRupiah(0);
                 document.getElementById('bonusValue').textContent = formatRupiah(0);
             } else {
