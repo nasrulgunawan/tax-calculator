@@ -1,0 +1,757 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kalkulator Pajak - Freelance & Karyawan</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        :root {
+            --bg-color: #fafafa;
+            --card-bg: #ffffff;
+            --text-primary: #1a1a1a;
+            --text-secondary: #666666;
+            --text-muted: #999999;
+            --border-color: #e5e5e5;
+            --border-light: #f0f0f0;
+            --primary: #000000;
+            --primary-light: #f5f5f5;
+            --success: #10b981;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --radius-sm: 6px;
+            --radius-md: 8px;
+            --radius-lg: 12px;
+            --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: var(--bg-color);
+            min-height: 100vh;
+            padding: 40px 20px;
+            line-height: 1.5;
+        }
+        
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        
+        h1 {
+            font-size: 28px;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 8px;
+            letter-spacing: -0.02em;
+        }
+        
+        .subtitle {
+            color: var(--text-secondary);
+            font-size: 15px;
+        }
+        
+        .card {
+            background: var(--card-bg);
+            border-radius: var(--radius-lg);
+            border: 1px solid var(--border-color);
+            overflow: hidden;
+        }
+        
+        .calculator-wrapper {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+        }
+        
+        @media (max-width: 900px) {
+            .calculator-wrapper {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        .input-section {
+            padding: 32px;
+            border-right: 1px solid var(--border-light);
+        }
+        
+        @media (max-width: 900px) {
+            .input-section {
+                border-right: none;
+                border-bottom: 1px solid var(--border-light);
+                padding: 24px;
+            }
+        }
+        
+        .result-section {
+            padding: 32px;
+            background: var(--primary-light);
+        }
+        
+        @media (max-width: 900px) {
+            .result-section {
+                padding: 24px;
+            }
+        }
+        
+        .input-groups {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+        
+        .input-group {
+            display: block !important;
+        }
+        
+        .input-group > div {
+            display: block !important;
+        }
+        
+        .input-group {
+            margin-bottom: 0;
+        }
+        
+        .input-group.collapsible .collapsible-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            cursor: pointer;
+            padding: 12px 0;
+            border-bottom: 1px solid var(--border-light);
+        }
+        
+        .input-group.collapsible .collapsible-content {
+            padding-top: 16px;
+            display: none;
+        }
+        
+        .input-group.collapsible.open .collapsible-content {
+            display: block;
+        }
+        
+        .input-group.collapsible.open .chevron {
+            transform: rotate(180deg);
+        }
+        
+        .chevron {
+            transition: transform 0.2s;
+            color: var(--text-muted);
+        }
+        
+        .mode-toggle {
+            display: flex;
+            background: var(--bg-color);
+            border-radius: var(--radius-md);
+            padding: 4px;
+            margin-bottom: 24px;
+            border: 1px solid var(--border-color);
+        }
+        
+        .mode-btn {
+            flex: 1;
+            padding: 10px 16px;
+            border: none;
+            background: transparent;
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.2s;
+            color: var(--text-secondary);
+        }
+        
+        .mode-btn:hover {
+            color: var(--text-primary);
+        }
+        
+        .mode-btn.active {
+            background: var(--card-bg);
+            color: var(--text-primary);
+            box-shadow: var(--shadow-sm);
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 6px;
+            color: var(--text-primary);
+            font-weight: 500;
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 0.03em;
+        }
+        
+        .label-with-badge {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .badge {
+            font-size: 10px;
+            padding: 2px 8px;
+            background: var(--border-light);
+            color: var(--text-secondary);
+            border-radius: 100px;
+            text-transform: none;
+            font-weight: 500;
+            letter-spacing: 0;
+        }
+        
+        .currency-input-wrapper {
+            position: relative;
+        }
+        
+        .currency-prefix {
+            position: absolute;
+            left: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-muted);
+            font-size: 15px;
+            font-weight: 500;
+            pointer-events: none;
+        }
+        
+        .currency-input {
+            width: 100%;
+            padding: 12px 14px 12px 42px;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            font-size: 15px;
+            transition: all 0.2s;
+            font-family: inherit;
+            background: var(--card-bg);
+            color: var(--text-primary);
+        }
+        
+        .currency-input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.05);
+        }
+        
+        .currency-input::placeholder {
+            color: var(--text-muted);
+        }
+        
+        select {
+            width: 100%;
+            padding: 12px 14px;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            font-size: 14px;
+            transition: all 0.2s;
+            background: var(--card-bg);
+            color: var(--text-primary);
+            cursor: pointer;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23999' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 12px center;
+            padding-right: 40px;
+        }
+        
+        select:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.05);
+        }
+        
+        .freelance-only {
+            display: none !important;
+        }
+        
+        .freelance-only.show {
+            display: flex !important;
+        }
+        
+        .result-row.freelance-only.show {
+            display: flex !important;
+        }
+        
+        .employee-only {
+            display: none;
+        }
+        
+        .employee-only.show {
+            display: block;
+        }
+        
+        .result-row.employee-only {
+            display: none;
+        }
+        
+        .result-row.employee-only.show {
+            display: flex;
+        }
+        
+        .freelance-only {
+            display: none;
+        }
+        
+        .freelance-only.show {
+            display: block;
+        }
+        
+        .result-row.freelance-only {
+            display: none;
+        }
+        
+        .result-row.freelance-only.show {
+            display: flex;
+        }
+        
+        .employee-only.show {
+            display: flex !important;
+        }
+        
+        .result-row.employee-only.show {
+            display: flex !important;
+        }
+        
+        .info-box {
+            background: var(--bg-color);
+            border: 1px solid var(--border-color);
+            padding: 14px 16px;
+            border-radius: var(--radius-md);
+            font-size: 13px;
+            color: var(--text-secondary);
+            line-height: 1.6;
+            margin-top: 8px;
+        }
+        
+        .result-title {
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-bottom: 20px;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            font-weight: 600;
+        }
+        
+        .result-section-title {
+            font-size: 11px;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            font-weight: 600;
+            margin: 24px 0 12px 0;
+            padding-top: 16px;
+            border-top: 1px solid var(--border-color);
+        }
+        
+        .result-section-title:first-of-type {
+            margin-top: 0;
+            padding-top: 0;
+            border-top: none;
+        }
+        
+        .result-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid var(--border-color);
+            gap: 16px;
+        }
+        
+        .result-row:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
+        }
+        
+        .result-row.sub-item {
+            padding-left: 16px;
+        }
+        
+        .result-row.sub-item .result-label {
+            color: var(--text-muted);
+            font-size: 13px;
+        }
+        
+        .result-row.total {
+            background: var(--card-bg);
+            padding: 14px 16px;
+            border-radius: var(--radius-md);
+            border: 1px solid var(--border-color);
+            margin-top: 12px;
+            box-shadow: var(--shadow-sm);
+        }
+        
+        .result-label {
+            color: var(--text-secondary);
+            font-size: 14px;
+        }
+        
+        .result-value {
+            font-weight: 600;
+            color: var(--text-primary);
+            font-size: 14px;
+            font-family: 'SF Mono', Monaco, monospace;
+            flex-shrink: 0;
+            text-align: right;
+        }
+        
+        .result-value.large {
+            font-size: 16px;
+        }
+        
+        .result-value.negative {
+            color: var(--danger);
+        }
+        
+        .result-value.positive {
+            color: var(--success);
+        }
+        
+        .result-value.highlight {
+            color: var(--warning);
+        }
+        
+        .divider {
+            height: 1px;
+            background: var(--border-color);
+            margin: 16px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Kalkulator Pajak</h1>
+            <p class="subtitle">Hitung PPh 21 untuk karyawan dan freelance</p>
+        </header>
+        
+        <div class="card">
+            <div class="calculator-wrapper">
+                <div class="input-section">
+                    <div class="mode-toggle">
+                        <button class="mode-btn active" data-mode="employee">Karyawan</button>
+                        <button class="mode-btn" data-mode="freelance">Freelance (NPPN)</button>
+                        <button class="mode-btn" data-mode="freelance_no_nppn">Freelance (Bruto)</button>
+                    </div>
+
+                    <div class="input-groups">
+                        <div class="input-group">
+                            <label for="income">Gaji Pokok per Bulan</label>
+                            <div class="currency-input-wrapper">
+                                <span class="currency-prefix">Rp</span>
+                                <input type="text" class="currency-input" id="income" placeholder="0" autocomplete="off">
+                            </div>
+                        </div>
+
+                        <div class="input-group employee-only" id="thrSection">
+                            <div class="label-with-badge">
+                                <label>THR & Bonus</label>
+                                <span class="badge">Opsional</span>
+                            </div>
+                            
+                            <div style="margin-top: 12px;">
+                                <label for="thr" style="text-transform: none; font-size: 12px; color: var(--text-secondary);">THR (Tunjangan Hari Raya)</label>
+                                <div class="currency-input-wrapper" style="margin-top: 6px;">
+                                    <span class="currency-prefix">Rp</span>
+                                    <input type="text" class="currency-input" id="thr" placeholder="0" autocomplete="off">
+                                </div>
+                            </div>
+                            
+                            <div style="margin-top: 12px;">
+                                <label for="bonus" style="text-transform: none; font-size: 12px; color: var(--text-secondary);">Bonus / Insentif Lainnya</label>
+                                <div class="currency-input-wrapper" style="margin-top: 6px;">
+                                    <span class="currency-prefix">Rp</span>
+                                    <input type="text" class="currency-input" id="bonus" placeholder="0" autocomplete="off">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="input-group freelance-only" id="normaSection">
+                            <label for="norma">Norma Penghitungan</label>
+                            <select id="norma">
+                                <option value="50">50% — Jasa profesional</option>
+                                <option value="40">40% — Jasa teknis & pendidikan</option>
+                                <option value="30">30% — Perdagangan & pengangkutan</option>
+                                <option value="20">20% — Industri & pertanian</option>
+                            </select>
+                        </div>
+
+                        <div class="input-group">
+                            <label for="ptkp">Status PTKP</label>
+                            <select id="ptkp">
+                                <option value="54000000">TK/0 — Rp 54.000.000</option>
+                                <option value="58500000">TK/1 — Rp 58.500.000</option>
+                                <option value="63000000">TK/2 — Rp 63.000.000</option>
+                                <option value="67500000">TK/3 — Rp 67.500.000</option>
+                                <option value="58500000">K/0 — Rp 58.500.000</option>
+                                <option value="63000000">K/1 — Rp 63.000.000</option>
+                                <option value="67500000">K/2 — Rp 67.500.000</option>
+                                <option value="72000000">K/3 — Rp 72.000.000</option>
+                            </select>
+                        </div>
+
+                        <div class="info-box" id="infoBox">
+                            Pajak dihitung menggunakan tarif progresif PPh 21 untuk karyawan.
+                        </div>
+                    </div>
+                </div>
+
+                <div class="result-section">
+                    <div class="result-title">Ringkasan Perhitungan</div>
+                    
+                    <div class="result-section-title">Penghasilan</div>
+                    
+                    <div class="result-row">
+                        <span class="result-label">Gaji Pokok (12 bulan)</span>
+                        <span class="result-value" id="yearlyIncome">Rp 0</span>
+                    </div>
+                    
+                    <div class="result-row employee-only" id="thrResultRow">
+                        <span class="result-label">THR</span>
+                        <span class="result-value" id="thrValue">Rp 0</span>
+                    </div>
+                    
+                    <div class="result-row employee-only" id="bonusResultRow">
+                        <span class="result-label">Bonus & Lainnya</span>
+                        <span class="result-value" id="bonusValue">Rp 0</span>
+                    </div>
+                    
+                    <div class="result-row">
+                        <span class="result-label">Total Penghasilan Bruto</span>
+                        <span class="result-value highlight" id="totalIncome">Rp 0</span>
+                    </div>
+                    
+                    <div class="result-row freelance-only" id="normaResultRow">
+                        <span class="result-label">Setelah Norma</span>
+                        <span class="result-value" id="incomeAfterNorma">Rp 0</span>
+                    </div>
+                    
+                    <div class="result-section-title">Perhitungan Pajak</div>
+                    
+                    <div class="result-row">
+                        <span class="result-label">PTKP</span>
+                        <span class="result-value negative" id="ptkpDisplay">- Rp 0</span>
+                    </div>
+                    
+                    <div class="result-row">
+                        <span class="result-label">PKP (Penghasilan Kena Pajak)</span>
+                        <span class="result-value" id="pkp">Rp 0</span>
+                    </div>
+                    
+                    <div class="result-row">
+                        <span class="result-label">Pajak per Tahun</span>
+                        <span class="result-value" id="yearlyTax">Rp 0</span>
+                    </div>
+                    
+                    <div class="result-row total">
+                        <span class="result-label">Pajak per Bulan</span>
+                        <span class="result-value large negative" id="monthlyTax">Rp 0</span>
+                    </div>
+                    
+                    <div class="result-row total">
+                        <span class="result-label">Take Home per Bulan</span>
+                        <span class="result-value large positive" id="takeHome">Rp 0</span>
+                    </div>
+                    
+                    <div class="result-row total" style="margin-top: 8px; border: 2px solid var(--success);">
+                        <span class="result-label">Penghasilan Bersih per Tahun</span>
+                        <span class="result-value large positive" id="yearlyNetIncome">Rp 0</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentMode = 'employee';
+
+        function formatCurrencyInput(value) {
+            const numericValue = value.replace(/\D/g, '');
+            if (numericValue === '') return '';
+            return parseInt(numericValue).toLocaleString('id-ID');
+        }
+
+        function parseCurrency(value) {
+            return parseInt(value.replace(/\D/g, '')) || 0;
+        }
+
+        function formatRupiah(amount) {
+            return 'Rp ' + amount.toLocaleString('id-ID');
+        }
+
+        function setupCurrencyInput(inputId) {
+            const input = document.getElementById(inputId);
+            
+            input.addEventListener('input', function(e) {
+                const cursorPosition = this.selectionStart;
+                const originalLength = this.value.length;
+                
+                const formatted = formatCurrencyInput(this.value);
+                this.value = formatted;
+                
+                const newLength = this.value.length;
+                const newPosition = cursorPosition + (newLength - originalLength);
+                this.setSelectionRange(newPosition, newPosition);
+                
+                calculate();
+            });
+
+            input.addEventListener('paste', function(e) {
+                e.preventDefault();
+                const pastedText = (e.clipboardData || window.clipboardData).getData('text');
+                const numericValue = pastedText.replace(/\D/g, '');
+                
+                if (numericValue) {
+                    const formatted = parseInt(numericValue).toLocaleString('id-ID');
+                    this.value = formatted;
+                    calculate();
+                }
+            });
+        }
+
+        setupCurrencyInput('income');
+        setupCurrencyInput('thr');
+        setupCurrencyInput('bonus');
+
+        document.querySelectorAll('.mode-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+                
+                currentMode = this.dataset.mode;
+                const normaSection = document.getElementById('normaSection');
+                const normaResultRow = document.getElementById('normaResultRow');
+                const thrSection = document.getElementById('thrSection');
+                const thrResultRow = document.getElementById('thrResultRow');
+                const bonusResultRow = document.getElementById('bonusResultRow');
+                const infoBox = document.getElementById('infoBox');
+                
+                if (currentMode === 'freelance') {
+                    normaSection.classList.add('show');
+                    normaResultRow.classList.add('show');
+                    thrSection.classList.remove('show');
+                    thrResultRow.classList.remove('show');
+                    bonusResultRow.classList.remove('show');
+                    infoBox.textContent = 'Pajak dihitung menggunakan Norma Penghitungan Penghasilan Neto (NPPN) sesuai PER-17/PJ/2015.';
+                } else if (currentMode === 'freelance_no_nppn') {
+                    normaSection.classList.remove('show');
+                    normaResultRow.classList.remove('show');
+                    thrSection.classList.remove('show');
+                    thrResultRow.classList.remove('show');
+                    bonusResultRow.classList.remove('show');
+                    infoBox.textContent = 'Pajak dihitung dari penghasilan bruto tanpa menggunakan norma (sama seperti karyawan tanpa THR/bonus).';
+                } else {
+                    normaSection.classList.remove('show');
+                    normaResultRow.classList.remove('show');
+                    thrSection.classList.add('show');
+                    thrResultRow.classList.add('show');
+                    bonusResultRow.classList.add('show');
+                    infoBox.textContent = 'Pajak dihitung menggunakan tarif progresif PPh 21 untuk karyawan.';
+                }
+                
+                calculate();
+            });
+        });
+
+        document.getElementById('norma').addEventListener('change', calculate);
+        document.getElementById('ptkp').addEventListener('change', calculate);
+
+        function calculateTax(pkp) {
+            let tax = 0;
+            
+            if (pkp <= 0) return 0;
+            
+            if (pkp > 5000000000) {
+                tax += (pkp - 5000000000) * 0.35;
+                pkp = 5000000000;
+            }
+            if (pkp > 500000000) {
+                tax += (pkp - 500000000) * 0.30;
+                pkp = 500000000;
+            }
+            if (pkp > 250000000) {
+                tax += (pkp - 250000000) * 0.25;
+                pkp = 250000000;
+            }
+            if (pkp > 60000000) {
+                tax += (pkp - 60000000) * 0.15;
+                pkp = 60000000;
+            }
+            tax += pkp * 0.05;
+            
+            return tax;
+        }
+
+        function calculate() {
+            const income = parseCurrency(document.getElementById('income').value);
+            const thr = parseCurrency(document.getElementById('thr').value);
+            const bonus = parseCurrency(document.getElementById('bonus').value);
+            const ptkp = parseFloat(document.getElementById('ptkp').value) || 0;
+            const normaPercent = parseFloat(document.getElementById('norma').value) || 50;
+            
+            const yearlyIncome = income * 12;
+            let totalIncome, incomeAfterNorma, pkp;
+            
+            if (currentMode === 'freelance') {
+                totalIncome = yearlyIncome;
+                incomeAfterNorma = yearlyIncome * (normaPercent / 100);
+                pkp = Math.max(0, incomeAfterNorma - ptkp);
+                
+                // Update results
+                document.getElementById('yearlyIncome').textContent = formatRupiah(yearlyIncome);
+                document.getElementById('totalIncome').textContent = formatRupiah(totalIncome);
+                document.getElementById('incomeAfterNorma').textContent = formatRupiah(incomeAfterNorma);
+                document.getElementById('thrValue').textContent = formatRupiah(0);
+                document.getElementById('bonusValue').textContent = formatRupiah(0);
+            } else if (currentMode === 'freelance_no_nppn') {
+                totalIncome = yearlyIncome;
+                pkp = Math.max(0, totalIncome - ptkp);
+                
+                // Update results
+                document.getElementById('yearlyIncome').textContent = formatRupiah(yearlyIncome);
+                document.getElementById('totalIncome').textContent = formatRupiah(totalIncome);
+                document.getElementById('incomeAfterNorma').textContent = formatRupiah(0);
+                document.getElementById('thrValue').textContent = formatRupiah(0);
+                document.getElementById('bonusValue').textContent = formatRupiah(0);
+            } else {
+                totalIncome = yearlyIncome + thr + bonus;
+                pkp = Math.max(0, totalIncome - ptkp);
+                
+                // Update results
+                document.getElementById('yearlyIncome').textContent = formatRupiah(yearlyIncome);
+                document.getElementById('thrValue').textContent = formatRupiah(thr);
+                document.getElementById('bonusValue').textContent = formatRupiah(bonus);
+                document.getElementById('totalIncome').textContent = formatRupiah(totalIncome);
+            }
+            
+            const yearlyTax = calculateTax(pkp);
+            const monthlyTax = yearlyTax / 12;
+            const takeHome = income - monthlyTax;
+            const yearlyNetIncome = totalIncome - yearlyTax;
+            
+            document.getElementById('ptkpDisplay').textContent = '- ' + formatRupiah(ptkp);
+            document.getElementById('pkp').textContent = formatRupiah(pkp);
+            document.getElementById('yearlyTax').textContent = formatRupiah(yearlyTax);
+            document.getElementById('monthlyTax').textContent = formatRupiah(monthlyTax);
+            document.getElementById('takeHome').textContent = formatRupiah(takeHome);
+            document.getElementById('yearlyNetIncome').textContent = formatRupiah(yearlyNetIncome);
+        }
+
+        // Initialize
+        document.getElementById('thrSection').classList.add('show');
+        document.getElementById('thrResultRow').classList.add('show');
+        document.getElementById('bonusResultRow').classList.add('show');
+        calculate();
+    </script>
+</body>
+</html>
