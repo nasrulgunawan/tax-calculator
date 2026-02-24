@@ -261,19 +261,27 @@
         }
         
         .freelance-only {
-            display: none;
+            display: none !important;
         }
         
         .freelance-only.show {
-            display: block;
+            display: flex !important;
+        }
+        
+        .result-row.freelance-only.show {
+            display: flex !important;
         }
         
         .employee-only {
-            display: none;
+            display: none !important;
         }
         
         .employee-only.show {
-            display: block;
+            display: flex !important;
+        }
+        
+        .result-row.employee-only.show {
+            display: flex !important;
         }
         
         .info-box {
