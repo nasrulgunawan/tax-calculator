@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kalkulator Pajak - Freelance & Karyawan</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        .container {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            max-width: 500px;
+            width: 100%;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 30px;
+            font-size: 24px;
+        }
+        .mode-toggle {
+            display: flex;
+            background: #f0f0f0;
+            border-radius: 12px;
+            padding: 4px;
+            margin-bottom: 30px;
+        }
+        .mode-btn {
+            flex: 1;
+            padding: 12px 20px;
+            border: none;
+            background: transparent;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.3s;
+            color: #666;
+        }
+        .mode-btn.active {
+            background: white;
+            color: #667eea;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        .input-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #555;
+            font-weight: 500;
+            font-size: 14px;
+        }
+        input, select {
+            width: 100%;
+            padding: 14px 16px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+        input:focus, select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        .freelance-only {
+            display: none;
+        }
+        .freelance-only.show {
+            display: block;
+        }
+        .calculate-btn {
+            width: 100%;
+            padding: 16px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            margin-top: 10px;
+        }
+        .calculate-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+        }
+        .result {
+            margin-top: 30px;
+            padding: 25px;
+            background: linear-gradient(135deg, #f5f7fa 0%, #e4e8ec 100%);
+            border-radius: 15px;
+            display: none;
+        }
+        .result.show {
+            display: block;
+        }
+        .result-title {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 15px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        .result-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 12px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid #ddd;
+        }
+        .result-row:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
+        }
+        .result-label {
+            color: #555;
+            font-size: 14px;
+        }
+        .result-value {
+            font-weight: 600;
+            color: #333;
+            font-size: 14px;
+        }
+        .result-value.highlight {
+            color: #667eea;
+            font-size: 20px;
+        }
+        .result-value.negative {
+            color: #e74c3c;
+        }
+        .info-box {
+            background: #e3f2fd;
+            border-left: 4px solid #2196f3;
+            padding: 12px 16px;
+            margin-bottom: 20px;
+            border-radius: 0 8px 8px 0;
+            font-size: 13px;
+            color: #1565c0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>💰 Kalkulator Pajak</h1>
+        
+        <div class="mode-toggle">
+            <button class="mode-btn active" onclick="setMode('employee')">Karyawan</button>
+            <button class="mode-btn" onclick="setMode('freelance')">Freelance</button>
+        </div>
+
+        <div class="input-group">
+            <label for="income">Penghasilan per Bulan (Rp)</label>
+            <input type="number" id="income" placeholder="Contoh: 10000000" min="0">
+        </div>
+
+        <div class="input-group freelance-only" id="normaSection">
+            <label for="norma">Norma Penghitungan (%)</label>
+            <select id="norma">
+                <option value="50">50% - Jasa profesional (konsultan, desainer, dll)</option>
+                <option value="40">40% - Jasa teknis, pendidikan, keagamaan</option>
+                <option value="30">30% - Jasa perdagangan, pengangkutan</option>
+                <option value="20">20% - Industri, pertanian, perkebunan</option>
+            </select>
+        </div>
+
+        <div class="input-group">
+            <label for="ptkp">Status PTKP</label>
+            <select id="ptkp">
+                <option value="54000000">TK/0 (Rp 54.000.000)</option>
+                <option value="58500000">TK/1 (Rp 58.500.000)</option>
+                <option value="63000000">TK/2 (Rp 63.000.000)</option>
+                <option value="67500000">TK/3 (Rp 67.500.000)</option>
+                <option value="58500000">K/0 (Rp 58.500.000)</option>
+                <option value="63000000">K/1 (Rp 63.000.000)</option>
+                <option value="67500000">K/2 (Rp 67.500.000)</option>
+                <option value="72000000">K/3 (Rp 72.000.000)</option>
+            </select>
+        </div>
+
+        <div class="info-box" id="infoBox">
+            Pajak dihitung menggunakan tarif progresif PPh 21 untuk karyawan.
+        </div>
+
+        <button class="calculate-btn" onclick="calculate()">Hitung Pajak</button>
+
+        <div class="result" id="result">
+            <div class="result-title">Hasil Perhitungan</div>
+            <div class="result-row">
+                <span class="result-label">Penghasilan per Tahun</span>
+                <span class="result-value" id="yearlyIncome">Rp 0</span>
+            </div>
+            <div class="result-row freelance-only" id="normaResultRow">
+                <span class="result-label">Penghasilan Kena Pajak (Setelah Norma)</span>
+                <span class="result-value" id="incomeAfterNorma">Rp 0</span>
+            </div>
+            <div class="result-row">
+                <span class="result-label">PTKP</span>
+                <span class="result-value negative">- Rp 0</span>
+            </div>
+            <div class="result-row">
+                <span class="result-label">PKP (Penghasilan Kena Pajak)</span>
+                <span class="result-value" id="pkp">Rp 0</span>
+            </div>
+            <div class="result-row">
+                <span class="result-label">Pajak per Tahun</span>
+                <span class="result-value highlight" id="yearlyTax">Rp 0</span>
+            </div>
+            <div class="result-row">
+                <span class="result-label">Pajak per Bulan</span>
+                <span class="result-value highlight" id="monthlyTax">Rp 0</span>
+            </div>
+            <div class="result-row">
+                <span class="result-label">Take Home per Bulan</span>
+                <span class="result-value highlight" id="takeHome">Rp 0</span>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentMode = 'employee';
+
+        function setMode(mode) {
+            currentMode = mode;
+            document.querySelectorAll('.mode-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            const normaSection = document.getElementById('normaSection');
+            const normaResultRow = document.getElementById('normaResultRow');
+            const infoBox = document.getElementById('infoBox');
+            
+            if (mode === 'freelance') {
+                normaSection.classList.add('show');
+                if (normaResultRow) normaResultRow.classList.add('show');
+                infoBox.textContent = 'Pajak freelance dihitung menggunakan Norma Penghitungan Penghasilan Neto (NPPN) sesuai PER-17/PJ/2015.';
+            } else {
+                normaSection.classList.remove('show');
+                if (normaResultRow) normaResultRow.classList.remove('show');
+                infoBox.textContent = 'Pajak dihitung menggunakan tarif progresif PPh 21 untuk karyawan.';
+            }
+            
+            document.getElementById('result').classList.remove('show');
+        }
+
+        function formatRupiah(amount) {
+            return 'Rp ' + amount.toLocaleString('id-ID');
+        }
+
+        function calculateTax(pkp) {
+            // Tarif progresif PPh 21
+            // 5% untuk PKP sampai Rp 60 juta
+            // 15% untuk PKP Rp 60 juta - Rp 250 juta
+            // 25% untuk PKP Rp 250 juta - Rp 500 juta
+            // 30% untuk PKP Rp 500 juta - Rp 5 miliar
+            // 35% untuk PKP di atas Rp 5 miliar
+            
+            let tax = 0;
+            
+            if (pkp <= 0) return 0;
+            
+            if (pkp > 5000000000) {
+                tax += (pkp - 5000000000) * 0.35;
+                pkp = 5000000000;
+            }
+            if (pkp > 500000000) {
+                tax += (pkp - 500000000) * 0.30;
+                pkp = 500000000;
+            }
+            if (pkp > 250000000) {
+                tax += (pkp - 250000000) * 0.25;
+                pkp = 250000000;
+            }
+            if (pkp > 60000000) {
+                tax += (pkp - 60000000) * 0.15;
+                pkp = 60000000;
+            }
+            tax += pkp * 0.05;
+            
+            return tax;
+        }
+
+        function calculate() {
+            const income = parseFloat(document.getElementById('income').value) || 0;
+            const ptkp = parseFloat(document.getElementById('ptkp').value) || 0;
+            const normaPercent = parseFloat(document.getElementById('norma').value) || 50;
+            
+            if (income <= 0) {
+                alert('Masukkan penghasilan yang valid!');
+                return;
+            }
+            
+            const yearlyIncome = income * 12;
+            let pkp;
+            let incomeAfterNorma;
+            
+            if (currentMode === 'freelance') {
+                // Freelance: gunakan norma penghitungan
+                incomeAfterNorma = yearlyIncome * (normaPercent / 100);
+                pkp = Math.max(0, incomeAfterNorma - ptkp);
+            } else {
+                // Karyawan: gunakan penghasilan bruto penuh
+                incomeAfterNorma = yearlyIncome;
+                pkp = Math.max(0, yearlyIncome - ptkp);
+            }
+            
+            const yearlyTax = calculateTax(pkp);
+            const monthlyTax = yearlyTax / 12;
+            const takeHome = income - monthlyTax;
+            
+            // Update hasil
+            document.getElementById('yearlyIncome').textContent = formatRupiah(yearlyIncome);
+            
+            if (currentMode === 'freelance') {
+                document.getElementById('incomeAfterNorma').textContent = formatRupiah(incomeAfterNorma);
+            }
+            
+            document.querySelector('.result-value.negative').textContent = '- ' + formatRupiah(ptkp);
+            document.getElementById('pkp').textContent = formatRupiah(pkp);
+            document.getElementById('yearlyTax').textContent = formatRupiah(yearlyTax);
+            document.getElementById('monthlyTax').textContent = formatRupiah(monthlyTax);
+            document.getElementById('takeHome').textContent = formatRupiah(takeHome);
+            
+            document.getElementById('result').classList.add('show');
+        }
+    </script>
+</body>
+</html>
